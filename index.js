@@ -78,13 +78,6 @@ function getChatKey() {
   } catch (e) { return '__default__'; }
 }
 
-function getNames() {
-  try {
-    const ctx = SillyTavern.getContext();
-    return { char: ctx?.name2 || 'the character', user: ctx?.name1 || 'the user' };
-  } catch (e) { return { char: 'the character', user: 'the user' }; }
-}
-
 function getChatState(key) {
   const s = getSettings();
   if (!s.chatStates) s.chatStates = {};
@@ -127,13 +120,13 @@ const sceneTypes = [
   { id: 'petplay', label: 'Pet Play', icon: '🐾', color: '#c47a3a', group: 'row1',
     directive: 'pet play — one is the owner, the other is the pet. Collar, leash, commands like sit, stay, and beg. Praise for obedience, punishment for disobedience. The pet does not speak in words unless permitted' },
   { id: 'bodywriting', label: 'Body Writing', icon: '✍️', color: '#6a8a6a', group: 'row1',
-    directive: 'body writing — the dominant writes on the other\'s skin with a marker, lipstick, or eyeliner. Words, labels, arrows pointing at body parts, tally marks. Degrading, possessive, or vulgar. Describe what is written and where, and make them acknowledge it' },
+    directive: 'body writing — the dominant writes on the other\'s skin with a marker, lipstick, or eyeliner. Words, labels, arrows pointing at body parts, tally marks. Degrading, possessive, or vulgar. Describe what is written and where, and have the dominant demand it be acknowledged' },
   { id: 'gunplay', label: 'Gunplay', icon: '🔫', color: '#4a4a4a', group: 'row1',
     directive: 'a weapon is present and used as a tool of intimidation and arousal during the scene — pressed against skin, traced along the body, held as a threat. The danger is the point' },
   { id: 'directed', label: 'Directed', icon: '☝️', color: '#d4a843', group: 'row1',
-    directive: 'directed masturbation — the dominant watches and gives explicit commands: touch yourself here, use this, slower, faster, do not stop. The other obeys and performs on themselves while being watched' },
+    directive: 'directed masturbation — the dominant does not touch, only watches and gives explicit commands: touch yourself here, use this, slower, faster, do not stop. The dominant enjoys the control and keeps issuing instructions' },
   { id: 'gagging', label: 'Gagging', icon: '👄', color: '#b05070', group: 'row1',
-    directive: 'the dominant makes the other go down on them — deepthroat, gagging, a hand on the back of the head controlling pace and depth. Describe the sounds and the struggle' },
+    directive: 'the dominant makes the other go down on them — deepthroat, gagging, a hand on the back of the head setting the pace and the depth. The dominant is in charge of how far and how long' },
 
   // ── Row 2 ───────────────────────────────────────────────────────────────
   { id: 'spontaneous', label: 'Spontaneous', icon: '🚪', color: '#3ab8b8', group: 'row2',
@@ -145,7 +138,7 @@ const sceneTypes = [
   { id: 'sleepy', label: 'Sleepy / Lazy', icon: '😴', color: '#6b8aad', group: 'row2',
     directive: 'slow and drowsy — half-asleep, lazy, tangled in bedding, completely unhurried' },
   { id: 'phonesex', label: 'Phone Sex', icon: '📱', color: '#5ca0d3', group: 'row2',
-    directive: 'sex over voice or text — the characters are NOT in the same room. One gives explicit instructions remotely, the other follows them alone. Describe what each one hears, says, and does to themselves' },
+    directive: 'sex over voice or text — the characters are NOT in the same room. One gives explicit instructions down the line and describes what they are doing to themselves while listening' },
   { id: 'cosplay', label: 'RP in RP', icon: '🎭', color: '#9b6fbf', group: 'row2',
     directive: 'roleplay inside the roleplay — they adopt a scenario and stay in those invented roles for the scene: strangers meeting, boss and employee, an interrogation, a stranger paying for it, whatever fits their dynamic. Pick one and commit' },
 
@@ -163,14 +156,16 @@ const sceneTypes = [
   { id: 'objects', label: 'Objects', icon: '🍾', color: '#8a7a5a', group: 'row3',
     directive: 'improvised objects, NOT purpose-made toys — household items, a bottle neck, a handle, ice, food, whatever happens to be within reach. The improvisation is the point' },
   { id: 'overstim', label: 'Overstim', icon: '⚡', color: '#d4c040', group: 'row3',
-    directive: 'overstimulation and repeated forced orgasms — push well past the first climax and keep going. The receiving character is overwhelmed, shaking, oversensitive, begging, and not allowed to rest. Describe the exhaustion and the relentlessness' },
+    directive: 'overstimulation and repeated forced orgasms — the dominant pushes well past the first climax and refuses to stop or let the other rest, regardless of protest. Write the dominant\'s relentlessness and their enjoyment of it' },
 ];
 
 // ─── Prompt construction ───────────────────────────────────────────────────
+// Names are left as SillyTavern macros ({{char}}, {{user}}) rather than
+// resolved here. ST substitutes them when it assembles the prompt, so the
+// extension never has to read or handle the persona name itself.
 function buildPrompt(sceneType, recentContext) {
   const scene = sceneTypes.find(s => s.id === sceneType);
   if (!scene) return '';
-  const { char, user } = getNames();
   const s = getSettings();
 
   const ctxBlock = recentContext.trim()
@@ -182,13 +177,14 @@ function buildPrompt(sceneType, recentContext) {
 
   return `[OOC — direction for this response only. Not story text, not to be quoted.]
 
-${ctxBlock}In this response, ${char} initiates sex with ${user}. The scene is ${scene.directive}.
+${ctxBlock}In this response, {{char}} initiates sex with {{user}}. Type of scene: ${scene.directive}.
 
 Rules for this response:
-- It happens in THIS response. Do not defer it, do not set it up for later.
-- Do not fade to black, cut away, or summarize past it. Write the scene.
-- If the current moment does not lead there, ${char} makes it lead there — closes the distance, changes the subject, acts on impulse. Bridge it in one or two lines, then proceed.
-- ${char} is the one who starts it. Do not wait for ${user} to initiate.
+- {{char}} starts it here, in this response. Do not defer it or set it up for later.
+- This response BEGINS the scene. It does not finish it. Stop while the scene is still unfolding, at a moment that hands the initiative back to {{user}}. Do not reach a conclusion, do not write an aftermath, do not resolve it.
+- Write ONLY {{char}}. Never put words in {{user}}'s mouth and never decide what {{user}} does — no dialogue, no actions, no choices made on their behalf. You may write what {{char}} perceives of them, but {{user}}'s responses are {{user}}'s to give. Where the scene description above refers to the other person, that describes what {{char}} does and wants; it is NOT permission to narrate {{user}}.
+- Do not fade to black, cut away, or time-skip.
+- If the current moment does not lead there, {{char}} makes it lead there — closes the distance, changes the subject, acts on impulse. Bridge it in a line or two, then proceed.
 - Keep your established voice, prose style, and characterization intact.${extra}
 
 [/OOC]`;
@@ -199,7 +195,8 @@ function getRecentContext(maxMessages) {
     const ctx = SillyTavern.getContext();
     if (!ctx?.chat?.length) return '';
     return ctx.chat.filter(m => !m.is_system).slice(-maxMessages).map(m => {
-      const spk = m.is_user ? (ctx.name1 || 'Player') : (ctx.name2 || 'Character');
+      // Macros again — ST resolves these to the same labels the chat uses.
+      const spk = m.is_user ? '{{user}}' : '{{char}}';
       return `${spk}: ${(m.mes || '').replace(/<[^>]*>/g, '').trim()}`;
     }).join('\n\n');
   } catch (e) { return ''; }
