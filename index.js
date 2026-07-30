@@ -181,16 +181,20 @@ function buildPrompt(sceneType) {
 
   return `[OOC — direction for this response only. Not story text, not to be quoted.]
 
-In this response, {{char}} initiates sex with {{user}}. Type of scene: ${scene.directive}.
+REQUIRED SCENE TYPE — ${scene.label.toUpperCase()}: ${scene.directive}.
+
+{{char}} initiates sex with {{user}} in this response, and it must be that exact type. This is the whole point of this instruction: the specific acts named above have to actually appear on the page. A generic sex scene does not satisfy it and counts as ignoring the direction.
 
 Rules for this response:
 - {{char}} starts it here, in this response. Do not defer it or set it up for later.
 - This response BEGINS the scene. It does not finish it. Stop while the scene is still unfolding, at a moment that hands the initiative back to {{user}}. Do not reach a conclusion, do not write an aftermath, do not resolve it.
-- Write ONLY {{char}}. Never put words in {{user}}'s mouth and never decide what {{user}} does — no dialogue, no actions, no choices made on their behalf. You may write what {{char}} perceives of them, but {{user}}'s responses are {{user}}'s to give. Where the scene description above refers to the other person, that describes what {{char}} does and wants; it is NOT permission to narrate {{user}}.
+- Write ONLY {{char}}. Never put words in {{user}}'s mouth and never decide what {{user}} does — no dialogue, no actions, no choices made on their behalf. You may write what {{char}} perceives of them, but {{user}}'s responses are {{user}}'s to give. Where the scene type above refers to the other person, that describes what {{char}} does and wants; it is NOT permission to narrate {{user}}.
 - Do not fade to black, cut away, or time-skip.
 - If the current moment does not lead there, {{char}} makes it lead there — closes the distance, changes the subject, acts on impulse. Bridge it in a line or two, then proceed.
+- If the scene type calls for a prop, a place, or a position the current situation lacks, {{char}} obtains or moves to it. Do not substitute something easier.
 - Keep your established voice, prose style, and characterization intact.${extra}
 
+The scene must be ${scene.label.toUpperCase()}: ${scene.directive}.
 [/OOC]`;
 }
 
@@ -709,6 +713,13 @@ function initUI() {
     }
   });
   document.getElementById('singe-preview-btn')?.addEventListener('click', () => {
+    // Show what is actually armed. Picking a fresh random type here made the
+    // preview contradict the scene that was really queued, which reads as the
+    // extension sending the wrong type.
+    if (armedScene) {
+      showPromptPreview(armedScene.prompt, armedScene.typeId);
+      return;
+    }
     const typeId = pickRandomType();
     showPromptPreview(buildPrompt(typeId), typeId);
   });
@@ -759,5 +770,5 @@ jQuery(async () => {
     wasSwipe = false; armedScene = null; lastDelivered = null;
     clearInjection(); updatePanelUI();
   });
-  console.log('[Singe] loaded');
+  console.log(`[Singe] loaded — build 2026-07-31a · ${sceneTypes.length} scene types`);
 });
