@@ -346,53 +346,24 @@ function showPromptPreview(prompt, typeId) {
 }
 
 // ─── Panel UI update ───────────────────────────────────────────────────────
-// Russian needs three plural forms: 1 сообщение, 2 сообщения, 5 сообщений.
-function plural(n, one, few, many) {
-  const m10 = n % 10, m100 = n % 100;
-  if (m10 === 1 && m100 !== 11) return one;
-  if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return few;
-  return many;
-}
-
 function updatePanelUI() {
-  const key = getChatKey();
-  const state = getChatState(key);
   const s = getSettings();
   const chance = getCurrentChance();
 
   const brand = document.getElementById('singe-brand');
   if (brand) brand.classList.toggle('singe-brand-off', !s.isEnabled);
 
+  const power = document.getElementById('singe-power');
+  if (power) {
+    power.textContent = s.isEnabled ? 'вкл' : 'выкл';
+    power.classList.toggle('singe-power-off', !s.isEnabled);
+  }
+
+  const panel = document.querySelector('.singe-panel');
+  if (panel) panel.classList.toggle('singe-panel-off', !s.isEnabled);
+
   const num = document.getElementById('singe-chance-num');
   if (num) num.textContent = chance;
-
-  const fill = document.getElementById('singe-bar-fill');
-  if (fill) fill.style.width = Math.min(chance, 100) + '%';
-
-  // Plain language beats percentage jargon: say how often it actually lands.
-  const plain = document.getElementById('singe-chance-plain');
-  if (plain) {
-    const every = Math.max(1, Math.round(100 / Math.max(chance, 1)));
-    const grown = s.useGrowingChance && chance > s.chance;
-    plain.textContent = `≈ раз в ${every} ${plural(every, 'ответ', 'ответа', 'ответов')}`
-      + (grown ? ` · выросло с ${s.chance}%` : '');
-  }
-
-  const st = document.getElementById('singe-chance-state');
-  if (st) {
-    const since = state.messagesSinceLastTrigger;
-    if (state.triggerCount > 0 && since <= SCENE_PAUSE) {
-      const left = SCENE_PAUSE - since + 1;
-      st.textContent = `пауза после сцены · ещё ${left} ${plural(left, 'ответ', 'ответа', 'ответов')}`;
-      st.classList.add('singe-state-paused');
-    } else {
-      st.textContent = `${since} ${plural(since, 'ответ', 'ответа', 'ответов')} без сцены`;
-      st.classList.remove('singe-state-paused');
-    }
-  }
-
-  const tracker = document.getElementById('singe-session-tracker');
-  if (tracker) tracker.textContent = `${state.messageCount} · ${state.triggerCount}`;
 }
 
 // ─── Main event ────────────────────────────────────────────────────────────
@@ -485,9 +456,9 @@ function escapeAttr(str) {
 function buildSettingsHTML() {
   const rowBlocks = sceneGroups.map(g => {
     const words = sceneTypes.filter(t => t.group === g.id).map(t => `
-        <button class="singe-type-pill" data-type="${t.id}" style="--type-color:${t.color}" title="${escapeAttr(t.directive)}">${t.label}</button>`).join('');
+        <button class="singe-type-pill" data-type="${t.id}" title="${escapeAttr(t.directive)}">${t.label}</button>`).join('');
     return `
-    <div class="singe-group" data-group="${g.id}">
+    <div class="singe-group">
       <div class="singe-strip-wrap">
         <button class="singe-arrow singe-arrow-l" data-scroll="${g.id}" data-dir="-1" aria-label="Влево">‹</button>
         <div class="singe-strip" data-strip="${g.id}">${words}</div>
@@ -502,45 +473,26 @@ function buildSettingsHTML() {
   <div class="singe-eyebrow">
     <span class="singe-brand" id="singe-brand">Singe</span>
     <span class="singe-rule"></span>
-    <span class="singe-eyebrow-meta" id="singe-session-tracker">0 · 0</span>
+    <button class="singe-power" id="singe-power">вкл</button>
   </div>
 
   <div class="singe-readout">
     <div class="singe-readout-top">
       <span class="singe-figure" id="singe-chance-num">8</span>
-      <span class="singe-figure-unit">% на каждый ответ бота</span>
+      <span class="singe-figure-unit">% шанс на каждый ответ</span>
     </div>
-    <div class="singe-readout-plain" id="singe-chance-plain">≈ раз в 13 ответов</div>
-    <div class="singe-gauge"><span class="singe-gauge-fill" id="singe-bar-fill"></span></div>
     <input type="range" class="singe-slider" id="singe-chance-slider" min="1" max="100" step="1">
-    <div class="singe-readout-state" id="singe-chance-state">0 ответов без сцены</div>
   </div>
 
-  <div class="singe-actions">
-    <button class="singe-act" id="singe-manual-trigger-btn">Зарядить</button>
-    <button class="singe-act singe-act-slim" id="singe-preview-btn" title="Показать промпт">Промпт</button>
-  </div>
-  <div class="singe-hint">Сработает на следующий ответ бота</div>
-
-  <div class="singe-eyebrow singe-eyebrow-sub">
-    <span class="singe-eyebrow-label">Типы сцен</span>
-    <span class="singe-rule"></span>
-    <span class="singe-eyebrow-meta" id="singe-total-count">0/21</span>
-  </div>
   <div id="singe-type-groups">${rowBlocks}</div>
 
-  <div class="singe-sub" id="singe-sub-settings">
-    <button class="singe-sub-header" data-target="singe-sub-settings">
-      <span class="singe-eyebrow-label">Настройки</span>
-      <span class="singe-rule"></span>
-      <span class="singe-sub-chevron">+</span>
-    </button>
-    <div class="singe-sub-body"><div>
+  <div class="singe-arm-wrap">
+    <button class="singe-act" id="singe-manual-trigger-btn">Зарядить</button>
+  </div>
 
-      <label class="singe-row">
-        <input type="checkbox" id="singe-enabled-toggle">
-        <span class="singe-row-text">Расширение включено</span>
-      </label>
+  <div class="singe-sub" id="singe-sub-settings">
+    <button class="singe-sub-header" data-target="singe-sub-settings">настройки</button>
+    <div class="singe-sub-body"><div>
 
       <label class="singe-row">
         <input type="checkbox" id="singe-growing-chance-toggle">
@@ -564,11 +516,13 @@ function buildSettingsHTML() {
         <textarea id="singe-extra-input" rows="3" class="singe-textarea" placeholder="Необязательно"></textarea>
       </div>
 
-      <button class="singe-act singe-act-slim singe-act-wide" id="singe-reset-btn">Сбросить счётчики</button>
+      <div class="singe-field-ctrl singe-field-ctrl-pair">
+        <button class="singe-mini" id="singe-preview-btn">Показать промпт</button>
+        <button class="singe-mini" id="singe-reset-btn">Сбросить счётчики</button>
+      </div>
     </div></div>
   </div>
 
-  <div class="singe-foot">Ctrl+Shift+S — зарядить · 🔻 метка в чате · пауза ${SCENE_PAUSE} ответов после сцены · свайп сохраняет сцену</div>
 </div>`;
 }
 
@@ -587,15 +541,7 @@ function initUI() {
     if (!root) return;
     const s2 = getSettings();
     s2.selectedTypes = [...root.querySelectorAll('.singe-type-pill.singe-type-active')].map(p => p.dataset.type);
-    refreshCounts();
     saveSettingsDebounced();
-  }
-
-  function refreshCounts() {
-    if (!root) return;
-    const on = root.querySelectorAll('.singe-type-pill.singe-type-active').length;
-    const total = document.getElementById('singe-total-count');
-    if (total) total.textContent = `${on}/${sceneTypes.length}`;
   }
 
   // Show or hide the desktop arrows depending on how far the strip is scrolled.
@@ -676,7 +622,6 @@ function initUI() {
       });
     });
 
-    refreshCounts();
     // The panel starts collapsed inside ST's drawer, so widths are 0 until it
     // is opened. Recheck on open, on resize, and once after layout settles.
     refreshAllArrows();
@@ -717,8 +662,19 @@ function initUI() {
     });
   }
 
+  document.getElementById('singe-power')?.addEventListener('click', () => {
+    const st = getSettings();
+    st.isEnabled = !st.isEnabled;
+    // Off must take effect now, not on the next message — otherwise a scene
+    // that is already armed still gets delivered after switching off.
+    if (!st.isEnabled) {
+      clearInjection(); wasSwipe = false; armedScene = null; lastDelivered = null;
+    }
+    saveSettingsDebounced();
+    updatePanelUI();
+  });
+
   [
-    ['singe-enabled-toggle', 'isEnabled'],
     ['singe-userrole-toggle', 'injectAsUser'],
   ].forEach(([id, key]) => {
     const el = document.getElementById(id);
@@ -726,11 +682,6 @@ function initUI() {
     el.checked = s[key];
     el.addEventListener('change', () => {
       s[key] = el.checked;
-      // Switching the extension off must take effect immediately, not on the
-      // next message — otherwise an already-armed scene still gets delivered.
-      if (key === 'isEnabled' && !el.checked) {
-        clearInjection(); wasSwipe = false; armedScene = null; lastDelivered = null;
-      }
       saveSettingsDebounced();
       updatePanelUI();
     });
@@ -742,9 +693,20 @@ function initUI() {
     extra.addEventListener('input', () => { s.extraInstruction = extra.value; saveSettingsDebounced(); });
   }
 
-  document.getElementById('singe-manual-trigger-btn')?.addEventListener('click', () => {
+  const armBtn = document.getElementById('singe-manual-trigger-btn');
+  armBtn?.addEventListener('click', () => {
     if (!getSettings().isEnabled) { flashHint('Расширение выключено'); return; }
+    const before = getChatState(getChatKey()).triggerCount;
     triggerScene();
+    if (getChatState(getChatKey()).triggerCount > before) {
+      // Confirm the tap without naming the type — that would give the game away.
+      armBtn.textContent = 'Заряжено';
+      armBtn.classList.add('singe-act-done');
+      setTimeout(() => {
+        armBtn.textContent = 'Зарядить';
+        armBtn.classList.remove('singe-act-done');
+      }, 2000);
+    }
   });
   document.getElementById('singe-preview-btn')?.addEventListener('click', () => {
     const typeId = pickRandomType();

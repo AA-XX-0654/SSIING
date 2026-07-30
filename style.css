@@ -26,7 +26,6 @@
   gap: 9px;
   padding: 0 14px 13px;
 }
-.singe-eyebrow-sub { padding-top: 20px; padding-bottom: 9px; }
 
 .singe-brand {
   font-size: 11px;
@@ -38,21 +37,30 @@
 }
 .singe-brand-off { color: rgba(255,255,255,0.14); }
 
-.singe-eyebrow-label {
+.singe-rule { flex: 1; height: 1px; background: var(--ink-hair); min-width: 8px; }
+.singe-power {
+  background: none;
+  border: none;
+  padding: 6px 0 6px 10px;
+  margin: -6px 0;
   font-size: 10px;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: .22em;
   text-transform: uppercase;
-  color: var(--ink-low);
-  white-space: nowrap;
+  color: rgba(255,255,255,0.62);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: color .2s;
+  flex-shrink: 0;
 }
-.singe-rule { flex: 1; height: 1px; background: var(--ink-hair); min-width: 8px; }
-.singe-eyebrow-meta {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--ink-low);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
+.singe-power.singe-power-off { color: rgba(255,255,255,0.2); }
+.singe-power:active { color: #fff; }
+
+.singe-panel-off .singe-readout,
+.singe-panel-off .singe-arm-wrap,
+.singe-panel-off #singe-type-groups {
+  opacity: .3;
+  transition: opacity .25s;
 }
 
 /* ── The one big number ────────────────────────────────── */
@@ -60,10 +68,10 @@
 .singe-readout-top { display: flex; align-items: flex-end; gap: 10px; }
 
 .singe-figure {
-  font-size: 50px;
+  font-size: 52px;
   font-weight: 200;
   letter-spacing: -.045em;
-  line-height: .76;
+  line-height: .78;
   color: rgba(255,255,255,0.93);
   font-variant-numeric: tabular-nums;
 }
@@ -74,78 +82,48 @@
   letter-spacing: .01em;
 }
 
-.singe-readout-plain {
-  font-size: 11.5px;
-  color: rgba(255,255,255,0.55);
-  padding: 11px 0 0;
-  letter-spacing: .01em;
-}
-
-.singe-readout-state {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--ink-low);
-  padding: 9px 0 0;
-  font-variant-numeric: tabular-nums;
-}
-.singe-readout-state.singe-state-paused { color: rgba(120,190,175,0.72); }
-
 /* ── Hairline gauge ────────────────────────────────────── */
-.singe-gauge {
-  position: relative;
-  height: 1px;
-  background: var(--ink-hair);
-  margin: 13px 0 0;
-}
-.singe-gauge-fill {
-  position: absolute;
-  left: 0; top: 0; bottom: 0;
-  width: 8%;
-  background: rgba(255,255,255,0.72);
-  transition: width .3s cubic-bezier(.4,0,.2,1);
-}
 
-/* ── Slider ────────────────────────────────────────────── */
+/* ── Slider ─────────────────────────────────────────────── */
 .singe-slider {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
-  height: 22px;
+  height: 26px;
   background: transparent;
   outline: none;
   cursor: pointer;
-  margin: 2px 0 0;
+  margin: 14px 0 0;
+  accent-color: rgba(255,255,255,0.9);
 }
 .singe-slider::-webkit-slider-runnable-track {
-  height: 1px;
-  background: var(--ink-hair);
+  height: 2px;
+  background: rgba(255,255,255,0.16);
+  border-radius: 2px;
 }
-.singe-slider::-moz-range-track { height: 1px; background: var(--ink-hair); }
+.singe-slider::-moz-range-track {
+  height: 2px; background: rgba(255,255,255,0.16); border-radius: 2px;
+}
 .singe-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 2px;
-  height: 14px;
+  width: 15px; height: 15px;
   margin-top: -6.5px;
-  background: rgba(255,255,255,0.85);
+  border-radius: 50%;
+  background: rgba(255,255,255,0.94);
   border: none;
-  border-radius: 0;
   cursor: pointer;
 }
 .singe-slider::-moz-range-thumb {
-  width: 2px; height: 14px;
-  background: rgba(255,255,255,0.85);
-  border: none; border-radius: 0;
+  width: 15px; height: 15px; border-radius: 50%;
+  background: rgba(255,255,255,0.94); border: none;
 }
 
-/* ── Actions ───────────────────────────────────────────── */
-.singe-actions {
-  display: flex;
-  gap: 6px;
-  padding: 16px 14px 0;
-}
+/* ── Arm button ─────────────────────────────────────────── */
+.singe-arm-wrap { padding: 16px 14px 0; }
 .singe-act {
-  flex: 1;
-  padding: 11px 8px;
+  display: block;
+  width: 100%;
+  padding: 13px 8px;
   background: none;
   border: 1px solid rgba(255,255,255,0.17);
   border-radius: 0;
@@ -160,24 +138,13 @@
   white-space: nowrap;
 }
 .singe-act:active { background: rgba(255,255,255,0.09); }
-.singe-act-slim {
-  flex: 0 0 auto;
-  padding: 11px 12px;
-  border-color: var(--ink-hair);
-  color: var(--ink-mid);
-  font-size: 10px;
-  letter-spacing: .08em;
+.singe-act.singe-act-done {
+  border-color: rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.1);
+  color: #fff;
 }
-.singe-act-wide { flex: 1 1 auto; width: 100%; margin-top: 6px; }
 @media (hover: hover) and (pointer: fine) {
-  .singe-act:hover { border-color: rgba(255,255,255,0.34); background: rgba(255,255,255,0.04); }
-  .singe-act-slim:hover { color: rgba(255,255,255,0.8); }
-}
-
-.singe-hint {
-  font-size: 10px;
-  color: var(--ink-low);
-  padding: 8px 14px 0;
+  .singe-act:hover { border-color: rgba(255,255,255,0.36); background: rgba(255,255,255,0.05); }
 }
 
 /* ── Scene words in swipeable rows ─────────────────────── */
@@ -245,9 +212,9 @@
   user-select: none;
 }
 .singe-type-pill.singe-type-active {
-  color: rgba(255,255,255,0.96);
+  color: rgba(255,255,255,0.97);
   font-weight: 600;
-  border-bottom-color: var(--type-color, rgba(255,255,255,0.9));
+  border-bottom-color: rgba(255,255,255,0.9);
 }
 .singe-type-pill:active { color: rgba(255,255,255,0.7); }
 /* Hover is disabled on touch: iOS keeps :hover on the last element tapped, so a
@@ -287,28 +254,40 @@
 /* ── Collapsible settings ──────────────────────────────── */
 .singe-sub { display: block; }
 .singe-sub-header {
-  display: flex;
-  align-items: center;
-  gap: 9px;
+  display: block;
   width: 100%;
-  padding: 22px 14px 11px;
+  padding: 20px 14px 12px;
   background: none;
   border: none;
   cursor: pointer;
   text-align: left;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.2);
+  transition: color .2s;
 }
-.singe-sub-chevron {
-  font-size: 13px;
-  font-weight: 300;
-  color: var(--ink-low);
-  transition: transform .28s cubic-bezier(.4,0,.2,1), color .2s;
-  line-height: 1;
-}
-.singe-sub.open .singe-sub-chevron { transform: rotate(135deg); }
-.singe-sub-header:hover .singe-sub-chevron { color: rgba(255,255,255,0.6); }
+.singe-sub.open .singe-sub-header,
+.singe-sub-header:active { color: rgba(255,255,255,0.5); }
 
+.singe-field-ctrl-pair { gap: 6px; padding-top: 6px; }
+.singe-mini {
+  flex: 1;
+  padding: 10px 6px;
+  background: none;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 0;
+  color: rgba(255,255,255,0.5);
+  font-size: 10.5px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: color .18s, border-color .18s;
+}
+.singe-mini:active { color: #fff; border-color: rgba(255,255,255,0.3); }
+.singe-sub.open .singe-sub-header:hover 
 .singe-sub-body {
   display: grid;
   grid-template-rows: 0fr;
@@ -322,8 +301,8 @@
 .singe-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 9px 0;
+  gap: 11px;
+  padding: 14px 0;
   cursor: pointer;
   border-bottom: 1px solid rgba(255,255,255,0.05);
   user-select: none;
@@ -331,8 +310,8 @@
 .singe-row input[type="checkbox"] {
   appearance: none;
   -webkit-appearance: none;
-  width: 13px;
-  height: 13px;
+  width: 16px;
+  height: 16px;
   flex-shrink: 0;
   border: 1px solid rgba(255,255,255,0.28);
   background: none;
@@ -389,13 +368,6 @@
   outline: none;
 }
 .singe-textarea:focus { border-bottom-color: rgba(255,255,255,0.4); }
-
-.singe-foot {
-  font-size: 9.5px;
-  color: rgba(255,255,255,0.2);
-  padding: 18px 14px 2px;
-  line-height: 1.6;
-}
 
 /* ── Chat marker ───────────────────────────────────────── */
 .singe-msg-indicator {
